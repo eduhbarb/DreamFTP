@@ -126,7 +126,7 @@ impl Server {
             Row::Look => RowValue::Text(self.prefs.theme.name().to_string()),
             Row::Colour => {
                 let name = PRESETS.iter().find(|&&(_, c)| c == self.accent).map_or("Custom", |&(n, _)| n);
-                RowValue::Colour(name, Palette::for_accent(Theme::Red, self.accent).accent)
+                RowValue::Colour(name, Palette::for_accent(Theme::Dream, self.accent).accent)
             }
             Row::AutoOff => RowValue::Text(match self.prefs.auto_off {
                 0 => "never".to_string(),
