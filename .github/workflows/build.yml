@@ -1,0 +1,99 @@
+name: build
+
+# Builds DreamFTP.cia and DreamFTP.3dsx. Run it by hand from the Actions tab
+# (workflow_dispatch), or push a v* tag to also attach the files to a release.
+# No signing key: the update check compares SHA256SUMS, which this workflow
+# writes but does not sign, so in-app updates stay off for this fork.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CARGO_3DS: 0.1.5
+      MAKEROM_URL: https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.19.0/makerom-v0.19.0-ubuntu_x86_64.zip
+      MAKEROM_SHA256: 287b809dec064e0ad597e3d272c49ecb7eed41693d5ee6fef9d8a8aa24c2497e
+      BANNERTOOL_URL: https://github.com/diasurgical/bannertool/releases/download/1.2.0/bannertool.zip
+      BANNERTOOL_SHA256: 69768596f836acb3e3aeaa66e47c6ba560dde813c6dfcd33c8afc25fe29b7524
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust and cargo-3ds
+        run: |
+          # the nightly the Makefile builds with
+          nightly=$(sed -n 's/^NIGHTLY[[:space:]]*:=[[:space:]]*//p' Makefile)
+          [ -n "$nightly" ] || { echo "no NIGHTLY in the Makefile" >&2; exit 1; }
+          rustup toolchain install "$nightly" --profile minimal -c rust-src
+          cargo install --locked cargo-3ds --version "$CARGO_3DS"
+
+      - name: Install libclang, makerom and bannertool
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q libclang-dev
+          tools="$RUNNER_TEMP/tools"
+          mkdir -p "$tools/bin"
+          curl -fsSLo "$tools/makerom.zip" "$MAKEROM_URL"
+          curl -fsSLo "$tools/bannertool.zip" "$BANNERTOOL_URL"
+          echo "$MAKEROM_SHA256  $tools/makerom.zip" | sha256sum -c
+          echo "$BANNERTOOL_SHA256  $tools/bannertool.zip" | sha256sum -c
+          unzip -q -j "$tools/makerom.zip" makerom -d "$tools/bin"
+          unzip -q -j "$tools/bannertool.zip" linux-x86_64/bannertool -d "$tools/bin"
+          chmod +x "$tools/bin/makerom" "$tools/bin/bannertool"
+          echo "$tools/bin" >> "$GITHUB_PATH"
+
+      - name: Build
+        run: ./build.sh | tee "$RUNNER_TEMP/build.log"
+
+      - name: Check the build
+        id: version
+        run: |
+          version=$(tr -d '\r\n' < VERSION)
+          grep -q "built \.\.\. DreamFTP.cia" "$RUNNER_TEMP/build.log" || { echo "the CIA wasn't built" >&2; exit 1; }
+          grep -q "built \.\.\. DreamFTP.3dsx" "$RUNNER_TEMP/build.log" || { echo "the 3dsx wasn't built" >&2; exit 1; }
+          title=$(sh tools/set-cia-version.sh DreamFTP.cia)
+          [ "$title" = "$version" ] || { echo "CIA title version $title, not $version" >&2; exit 1; }
+          # a tag must match the VERSION file
+          if [ "${GITHUB_REF_TYPE:-}" = tag ]; then
+            [ "$GITHUB_REF_NAME" = "v$version" ] || { echo "tag $GITHUB_REF_NAME but VERSION is $version" >&2; exit 1; }
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Checksums
+        run: sha256sum DreamFTP.cia DreamFTP.3dsx | tee SHA256SUMS
+
+      - name: Keep the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: DreamFTP-${{ steps.version.outputs.version }}
+          path: |
+            DreamFTP.cia
+            DreamFTP.3dsx
+            SHA256SUMS
+          if-no-files-found: error
+
+      - name: Attach to the release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" DreamFTP.cia DreamFTP.3dsx SHA256SUMS --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" DreamFTP.cia DreamFTP.3dsx SHA256SUMS \
+              --title "DreamFTP $VERSION" --generate-notes --verify-tag
+          fi
