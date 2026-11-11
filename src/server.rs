@@ -908,6 +908,11 @@ impl Server {
         let path = s.path.clone();
         if upload && ok && bundle.is_none() {
             self.cia_add(&path, size);
+            // a .cia sent over FTP installs on its own, like dropping it in FBI;
+            // reinstall, downgrade and system titles still ask on the bottom screen
+            if util::is_cia(&path) {
+                let _ = self.request_install(&path, true);
+            }
         }
         for (cia, size) in unpacked {
             self.cia_add(&cia, size);
