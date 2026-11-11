@@ -7,6 +7,11 @@ name: build
 
 on:
   workflow_dispatch:
+    inputs:
+      fast:
+        description: Quick build (no LTO, version gets -dev)
+        type: boolean
+        default: false
   push:
     tags: ["v*"]
 
@@ -56,7 +61,7 @@ jobs:
           echo "$tools/bin" >> "$GITHUB_PATH"
 
       - name: Build
-        run: ./build.sh | tee "$RUNNER_TEMP/build.log"
+        run: ./build.sh ${{ inputs.fast && 'fast' || '' }} | tee "$RUNNER_TEMP/build.log"
 
       - name: Check the build
         id: version
