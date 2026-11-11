@@ -1,14 +1,14 @@
 // Copyright (C) 2026 Synaelle
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Updates: once the network is up after Cement starts, a thread asks GitHub
+// Updates: once the network is up after DreamFTP starts, a thread asks GitHub
 // for the latest release. A newer one shows in Settings' Updates row (which
-// also turns the check off), where A streams its Cement.cia to the SD card and
+// also turns the check off), where A streams its DreamFTP.cia to the SD card and
 // installs it with the usual install code (install.rs), which deletes it after.
 // The release's SHA256SUMS is checked against its Ed25519 signature first, and
 // the download against SHA256SUMS, so only what the release workflow built and
 // signed is installed.
-// The installed title is Cement itself at a newer title version, so the 3DS
-// takes it over the running copy; it runs once Cement is restarted.
+// The installed title is DreamFTP itself at a newer title version, so the 3DS
+// takes it over the running copy; it runs once DreamFTP is restarted.
 
 use std::io::Read;
 use std::net::TcpStream;
@@ -21,16 +21,17 @@ use crate::http::{self, Fail};
 use crate::sys::{self, File};
 use crate::{Server, battery_low};
 
-const API: &str = "https://api.github.com/repos/Synaelle/cement/releases/latest";
-const DOWNLOAD: &str = "https://github.com/Synaelle/cement/releases/download/{tag}/Cement.cia";
+// fork: point these at your own release page before turning updates on
+const API: &str = "https://api.github.com/repos/DreamFTP/DreamFTP/releases/latest";
+const DOWNLOAD: &str = "https://github.com/DreamFTP/DreamFTP/releases/download/{tag}/DreamFTP.cia";
 
 /// the public half of the key the release workflow signs SHA256SUMS with
 const RELEASE_KEY: &str = "18d787177065e96304292b13b2ee55dcc840912731f0caad59bbb60ce3320b67";
 
 /// where the download goes (not one of the folders Recent lists)
-pub const FILE: &str = "/3ds/cement/update.cia";
-/// Cement's title ID (meta/Cement.rsf): the download has to be Cement
-const TITLE: u64 = 0x0004_0000_0F7A_5100;
+pub const FILE: &str = "/3ds/dreamftp/update.cia";
+/// DreamFTP's title ID (meta/DreamFTP.rsf): the download has to be DreamFTP
+const TITLE: u64 = 0x0004_0000_0F7A_5200;
 
 const MAX_JSON: u64 = 512 * 1024; // the release's JSON, notes included
 const MAX_CIA: u64 = 64 << 20;
@@ -109,7 +110,7 @@ pub enum Stage {
     Downloading,
     Waiting(u64), // downloaded (its size): installs once the SD card is free
     Installing,
-    Done, // installed: used once Cement restarts
+    Done, // installed: used once DreamFTP restarts
 }
 
 pub struct Updater {
@@ -174,7 +175,7 @@ fn fetch_small(url: &str, s: &Shared) -> Result<Vec<u8>, String> {
     Ok(data)
 }
 
-/// Cement.cia's SHA-256 from SHA256SUMS, once its signature checks out
+/// DreamFTP.cia's SHA-256 from SHA256SUMS, once its signature checks out
 fn signed_hash(url: &str, s: &Shared) -> Result<[u8; 32], String> {
     let base = &url[..url.rfind('/').ok_or("bad answer")? + 1];
     let sums = fetch_small(&format!("{base}SHA256SUMS"), s)?;
@@ -185,8 +186,8 @@ fn signed_hash(url: &str, s: &Shared) -> Result<[u8; 32], String> {
         .map_err(|_| "the release's signature doesn't match")?;
     String::from_utf8_lossy(&sums)
         .lines()
-        .find_map(|l| l.strip_suffix("  Cement.cia").and_then(crate::hash::unhex32))
-        .ok_or_else(|| "Cement.cia isn't in the signed list".to_string())
+        .find_map(|l| l.strip_suffix("  DreamFTP.cia").and_then(crate::hash::unhex32))
+        .ok_or_else(|| "DreamFTP.cia isn't in the signed list".to_string())
 }
 
 /// the download thread: the CIA streamed into FILE, checked against the
@@ -209,7 +210,7 @@ fn download(url: &str, s: &Shared) -> Outcome {
         return Outcome::Failed("not enough free space".into());
     }
     sys::create_dir("/3ds"); // fail when they exist already
-    sys::create_dir("/3ds/cement");
+    sys::create_dir("/3ds/dreamftp");
     let Some(f) = File::open_write(FILE).filter(|f| f.set_size(0)) else {
         return Outcome::Failed("SD card write error".into());
     };
@@ -327,11 +328,11 @@ impl Server {
             }
             Outcome::Saved(size) => {
                 sys::set_sleep_allowed(true); // the install blocks it again
-                // only ever Cement
+                // only ever DreamFTP
                 if crate::install::cia_info(FILE).is_some_and(|i| i.id == TITLE) {
                     self.update.stage = Stage::Waiting(size);
                 } else {
-                    self.update_failed("that isn't Cement".into());
+                    self.update_failed("that isn't DreamFTP".into());
                 }
             }
             Outcome::Failed(why) if kind == Kind::Download => {
@@ -354,7 +355,7 @@ impl Server {
         if ok {
             self.update.stage = Stage::Done;
             self.update.latest = None;
-            self.cia_news("Updated: restart Cement".into());
+            self.cia_news("Updated: restart DreamFTP".into());
         } else {
             self.update.stage = Stage::Idle;
             sys::delete_file(FILE); // the install keeps a file that failed
@@ -378,7 +379,7 @@ impl Server {
     pub fn update_activate(&mut self) {
         match self.update.stage {
             Stage::Idle => {}
-            Stage::Done => return self.cia_message("Restart Cement to use the update".into()),
+            Stage::Done => return self.cia_message("Restart DreamFTP to use the update".into()),
             _ => return,
         }
         let Some(tag) = self.update.latest.clone() else { return self.update_toggle() };

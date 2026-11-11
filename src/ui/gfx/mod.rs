@@ -6,7 +6,7 @@
 
 mod bottom;
 mod canvas;
-mod ficelle;
+mod sharp;
 mod font;
 
 use super::palette::{Palette, Theme};
@@ -106,8 +106,8 @@ impl Ui {
             bottom_at: 0,
             sd_free: None,
             hits: Vec::new(),
-            pal: Palette::for_accent(Theme::Red, DEFAULT_ACCENT),
-            pal_for: (Theme::Red, DEFAULT_ACCENT),
+            pal: Palette::for_accent(Theme::Dream, DEFAULT_ACCENT),
+            pal_for: (Theme::Dream, DEFAULT_ACCENT),
             info: None,
             drawn_for: (Tab::Recent, 0, None),
             picture: None,
@@ -359,11 +359,11 @@ fn help(row: Row) -> &'static str {
             "Both screens go dark after a minute with no button or transfer. Any button lights them again."
         }
         Row::AutoOff => "Turns the 3DS off after this long with no button and no FTP use. Left and right change it.",
-        Row::Update => "Looks for a newer Cement on GitHub when it starts, with the Wi-Fi on. A turns it on or off.",
+        Row::Update => "Looks for a newer DreamFTP on GitHub when it starts, with the Wi-Fi on. A turns it on or off.",
         Row::Look => {
-            "Red is Cement's own look, Miku is graphite and teal, Ficelle is sharp and quiet. A, left or right change it."
+            "Dream is purple, Teal is graphite, Sharp is purple with square corners. A, left or right change it."
         }
-        Row::Colour => "The red look's colour, kept in sync with Baguette. Left and right pick another one.",
+        Row::Colour => "The Dream look's colour, kept in sync with Baguette. Left and right pick another one.",
     }
 }
 
@@ -454,7 +454,7 @@ fn ticket_detail(size: u64, info: Option<&CiaInfo>) -> String {
             parts.push(format!("{:016X}", i.id));
             parts.join(" · ")
         }
-        None => format!("{} · not a CIA Cement can read", format_size(size)),
+        None => format!("{} · not a CIA DreamFTP can read", format_size(size)),
     }
 }
 
@@ -472,8 +472,8 @@ impl Server {
         let view = self.viewed_image();
         self.ui.drawn_for = (self.menu.tab, self.menu.row, view.clone());
         let Some(mut scr) = self.ui.top.take() else { return };
-        let sharp = self.prefs.theme == Theme::Ficelle;
-        let paint_note = if sharp { ficelle::paint_note } else { paint_note };
+        let sharp = self.prefs.theme == Theme::Sharp;
+        let paint_note = if sharp { sharp::paint_note } else { paint_note };
         if let Some(path) = view {
             if self.ui.picture.as_ref().is_none_or(|(p, _)| *p != path) {
                 // decoding holds the loop up a moment: say so first
@@ -496,7 +496,7 @@ impl Server {
         }
         self.ui.picture = None; // its memory back
         if sharp {
-            self.paint_top_ficelle(&mut scr.c, t);
+            self.paint_top_sharp(&mut scr.c, t);
         } else {
             self.paint_top(&mut scr.c, t);
         }
@@ -515,8 +515,8 @@ impl Server {
             self.ui.sd_free = sys::sd_space().map(|(free, _)| free);
         }
         let Some(mut scr) = self.ui.bottom.take() else { return };
-        self.ui.hits = if self.prefs.theme == Theme::Ficelle {
-            self.paint_bottom_ficelle(&mut scr.c, b)
+        self.ui.hits = if self.prefs.theme == Theme::Sharp {
+            self.paint_bottom_sharp(&mut scr.c, b)
         } else {
             self.paint_bottom(&mut scr.c, b)
         };
@@ -528,13 +528,13 @@ impl Server {
     fn update_help(&self) -> String {
         let tag = self.update.latest.as_deref().filter(|_| self.prefs.update);
         match (self.update.stage, tag) {
-            (Stage::Done, _) => "The update is installed: restart Cement to use it.".into(),
+            (Stage::Done, _) => "The update is installed: restart DreamFTP to use it.".into(),
             (Stage::Idle, Some(tag)) => format!(
-                "A downloads Cement {tag} and installs it, then restart Cement. Left and right turn the check off."
+                "A downloads DreamFTP {tag} and installs it, then restart DreamFTP. Left and right turn the check off."
             ),
             (Stage::Idle, None) => help(Row::Update).into(),
             (_, tag) => {
-                format!("Downloading and installing Cement {}. Keep the 3DS on until it's done.", tag.unwrap_or(""))
+                format!("Downloading and installing DreamFTP {}. Keep the 3DS on until it's done.", tag.unwrap_or(""))
             }
         }
     }
@@ -622,7 +622,12 @@ impl Server {
         let (left, right) = (16.0, 384.0);
         let mut y = 14.0;
         let f = &FREDOKA_BOLD_22;
-        let end = c.text(f, left, y + f.ascent, "cement", pal.text, 0.0);
+        // the mark: a purple disc with the background cut out of it, a crescent
+        let r = 8.0;
+        let cy = y + f.height / 2.0;
+        c.circle(left + r, cy, r, pal.accent);
+        c.circle(left + r + 3.4, cy - 2.6, r * 0.86, pal.bg);
+        let end = c.text(f, left + r * 2.0 + 9.0, y + f.ascent, "DreamFTP", pal.text, 0.0);
         let bat = t.bat;
         let label = format!(
             "{}{}",
@@ -655,7 +660,7 @@ impl Server {
         let x = tx + glyph(c, tx, ty, Button::Start, pal.dim, pal.bg, pal) + 4.0;
         c.text(h, x, ty + ((GLYPH - h.height) / 2.0).round() + h.ascent, "exit", pal.dim, 0.0);
         let room = tx - 8.0;
-        // the protocol level says which Baguette goes with this Cement (they version apart);
+        // the protocol level says which Baguette goes with this DreamFTP (they version apart);
         // a long -dev version is cut short before the hint
         let v = &NUNITO_BOLD_11;
         let version = v.fit(&format!("v{VERSION} · protocol {PROTOCOL}"), room - end - 6.0);

@@ -1,12 +1,16 @@
-Cement is licensed under the GNU Affero General Public License, version 3 or
+DreamFTP is licensed under the GNU Affero General Public License, version 3 or
 later (see LICENSE). It includes or is built with the following, under their
 own licenses.
+
+DreamFTP is a modified fork of Cement (https://github.com/Synaelle/cement),
+Copyright (C) 2026 Synaelle, also AGPL-3.0-or-later. The changes are the name,
+the icon and banner, the colour palettes and the in-app wordmark.
 
 -------------------------------------------------------------------------------
 FBI and buildtools
 
 The CIA install code in src/install.rs follows FBI
-(https://github.com/Steveice10/FBI), and meta/Cement.rsf is based on the
+(https://github.com/Steveice10/FBI), and meta/DreamFTP.rsf is based on the
 template from buildtools (https://github.com/Steveice10/buildtools).
 
 Both are under the MIT license:
@@ -34,7 +38,7 @@ built into the 3DS app.
 -------------------------------------------------------------------------------
 Hanken Grotesk font
 
-The Ficelle look uses Hanken Grotesk (Copyright 2021 The Hanken Grotesk Project
+The Sharp look uses Hanken Grotesk (Copyright 2021 The Hanken Grotesk Project
 Authors, https://github.com/marcologous/hanken-grotesk), under the SIL Open
 Font License 1.1, see assets/fonts/hanken/OFL.txt. The files in
 assets/fonts/hanken are 400 and 600 weight instances of the variable font
@@ -49,7 +53,7 @@ Commons Zero (CC0 1.0). The SVG files used and Kenney's license text are in
 assets/buttons. The build rasterises and tints them for the 3DS app.
 
 -------------------------------------------------------------------------------
-Built into the 3DS app (Cement.cia, Cement.3dsx)
+Built into the 3DS app (DreamFTP.cia, DreamFTP.3dsx)
 
 - libctru (https://github.com/devkitPro/libctru): zlib license
 - ctru-rs and ctru-sys (https://github.com/rust3ds/ctru-rs): zlib license

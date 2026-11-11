@@ -1,8 +1,8 @@
 name: release
 
 # A pushed v* tag first opens a draft release named after the version (the
-# notes are written by hand while it builds), then builds Cement.cia and
-# Cement.3dsx into it with their signed checksums, and makes it public once
+# notes are written by hand while it builds), then builds DreamFTP.cia and
+# DreamFTP.3dsx into it with their signed checksums, and makes it public once
 # all of them are on it.
 on:
   push:
@@ -96,8 +96,8 @@ jobs:
       - name: Check the version
         run: |
           # the version shown (no -dev suffix) and the CIA's title version, both from VERSION
-          grep -qx "built \.\.\. Cement.cia v$VERSION" "$RUNNER_TEMP/build.log" || { echo "the build isn't v$VERSION" >&2; exit 1; }
-          title=$(sh tools/set-cia-version.sh Cement.cia)
+          grep -qx "built \.\.\. DreamFTP.cia v$VERSION" "$RUNNER_TEMP/build.log" || { echo "the build isn't v$VERSION" >&2; exit 1; }
+          title=$(sh tools/set-cia-version.sh DreamFTP.cia)
           [ "$title" = "$VERSION" ] || { echo "CIA title version $title, not $VERSION" >&2; exit 1; }
 
       - name: Sign the checksums
@@ -113,7 +113,7 @@ jobs:
           # a wrong key in the secret fails here, not in Baguette
           public=$(openssl pkey -in "$key" -pubout -outform DER | tail -c 32 | od -An -tx1 | tr -d ' \n')
           [ "$public" = "$PUBLIC_KEY" ] || { echo "the signing key doesn't match the public key" >&2; exit 1; }
-          sha256sum Cement.cia Cement.3dsx > SHA256SUMS
+          sha256sum DreamFTP.cia DreamFTP.3dsx > SHA256SUMS
           openssl pkeyutl -sign -inkey "$key" -rawin -in SHA256SUMS -out SHA256SUMS.sig
           [ "$(wc -c < SHA256SUMS.sig)" -eq 64 ] || { echo "the signature isn't 64 bytes" >&2; exit 1; }
           cat SHA256SUMS
@@ -121,7 +121,7 @@ jobs:
       - name: Upload to the draft
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" Cement.cia Cement.3dsx SHA256SUMS SHA256SUMS.sig --clobber
+        run: gh release upload "$GITHUB_REF_NAME" DreamFTP.cia DreamFTP.3dsx SHA256SUMS SHA256SUMS.sig --clobber
 
   publish:
     needs: build
@@ -135,7 +135,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           assets=$(gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name')
-          for f in Cement.cia Cement.3dsx SHA256SUMS SHA256SUMS.sig; do
+          for f in DreamFTP.cia DreamFTP.3dsx SHA256SUMS SHA256SUMS.sig; do
             grep -qx "$f" <<< "$assets" || { echo "$f is missing from the release" >&2; exit 1; }
           done
           gh release edit "$GITHUB_REF_NAME" --draft=false

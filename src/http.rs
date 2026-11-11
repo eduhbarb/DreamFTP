@@ -258,7 +258,7 @@ fn request(url: &Url, accept: &str, sock: &Mutex<Option<TcpStream>>) -> Result<(
         Stream::Plain(tcp)
     };
     let req = format!(
-        "GET {} HTTP/1.1\r\nHost: {}\r\nUser-Agent: Cement/{}\r\nAccept: {accept}\r\nConnection: close\r\n\r\n",
+        "GET {} HTTP/1.1\r\nHost: {}\r\nUser-Agent: DreamFTP/{}\r\nAccept: {accept}\r\nConnection: close\r\n\r\n",
         url.path,
         url.host,
         crate::VERSION
@@ -312,12 +312,12 @@ mod tests {
 
     #[test]
     fn urls() {
-        let u = parse_url("https://GitHub.com/Synaelle/cement/releases/download/v1.2.0/Cement.cia").unwrap();
+        let u = parse_url("https://GitHub.com/DreamFTP/DreamFTP/releases/download/v1.2.0/DreamFTP.cia").unwrap();
         assert!(
             u.tls
                 && u.host == "github.com"
                 && u.port == 443
-                && u.path == "/Synaelle/cement/releases/download/v1.2.0/Cement.cia"
+                && u.path == "/DreamFTP/DreamFTP/releases/download/v1.2.0/DreamFTP.cia"
         );
         let u = parse_url("https://example.org:8443").unwrap();
         assert!(u.port == 8443 && u.path == "/");

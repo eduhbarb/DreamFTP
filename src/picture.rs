@@ -61,7 +61,7 @@ fn rgb(r: u8, g: u8, b: u8) -> u32 {
 fn png(data: Vec<u8>) -> Result<(Raw, (u32, u32)), String> {
     let mut d = png::Decoder::new(std::io::Cursor::new(data));
     d.set_transformations(png::Transformations::EXPAND | png::Transformations::STRIP_16);
-    let mut r = d.read_info().map_err(|_| "Not a PNG Cement can read")?;
+    let mut r = d.read_info().map_err(|_| "Not a PNG DreamFTP can read")?;
     let (w, h) = (r.info().width, r.info().height);
     if w as u64 * h as u64 > MAX_PIXELS {
         return Err(format!("Too big to show ({w} x {h})"));
@@ -83,8 +83,8 @@ fn png(data: Vec<u8>) -> Result<(Raw, (u32, u32)), String> {
 /// takes the file, to free it before the pixels are converted
 fn jpeg(data: Vec<u8>) -> Result<(Raw, (u32, u32)), String> {
     let mut d = jpeg_decoder::Decoder::new(std::io::Cursor::new(data));
-    d.read_info().map_err(|_| "Not a JPEG Cement can read")?;
-    let info = d.info().ok_or("Not a JPEG Cement can read")?;
+    d.read_info().map_err(|_| "Not a JPEG DreamFTP can read")?;
+    let info = d.info().ok_or("Not a JPEG DreamFTP can read")?;
     let full = (info.width as u32, info.height as u32);
     // a progressive JPEG keeps every coefficient of the full image while it decodes
     let progressive = info.coding_process == jpeg_decoder::CodingProcess::DctProgressive;
@@ -92,7 +92,7 @@ fn jpeg(data: Vec<u8>) -> Result<(Raw, (u32, u32)), String> {
         return Err(format!("Too big to show ({} x {})", full.0, full.1));
     }
     // the smallest 1/8 step still covering the screen: much less to decode
-    let (w, h) = d.scale(W as u16, H as u16).map_err(|_| "Not a JPEG Cement can read")?;
+    let (w, h) = d.scale(W as u16, H as u16).map_err(|_| "Not a JPEG DreamFTP can read")?;
     if w as u64 * h as u64 > MAX_PIXELS {
         return Err(format!("Too big to show ({} x {})", full.0, full.1));
     }
@@ -124,7 +124,7 @@ fn jpeg(data: Vec<u8>) -> Result<(Raw, (u32, u32)), String> {
 fn bmp(d: Vec<u8>) -> Result<(Raw, (u32, u32)), String> {
     let u16_at = |i: usize| d.get(i..i + 2).map(|b| u16::from_le_bytes([b[0], b[1]]));
     let u32_at = |i: usize| d.get(i..i + 4).map(|b| u32::from_le_bytes(b.try_into().unwrap()));
-    let bad = || "Not a BMP Cement can read".to_string();
+    let bad = || "Not a BMP DreamFTP can read".to_string();
     if !d.starts_with(b"BM") {
         return Err(bad());
     }
@@ -200,7 +200,7 @@ pub fn load(path: &str) -> Result<Picture, String> {
     } else if data.starts_with(b"BM") {
         bmp(data)?
     } else {
-        return Err("Not an image Cement can show".into());
+        return Err("Not an image DreamFTP can show".into());
     };
     let (w, h, px) = fit(raw);
     Ok(Picture { w, h, px, full })

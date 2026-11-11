@@ -1,6 +1,6 @@
 // Copyright (C) 2026 Synaelle
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Settings kept on the SD card in sdmc:/3ds/cement/settings.ini, one
+// Settings kept on the SD card in sdmc:/3ds/dreamftp/settings.ini, one
 // "key=value" per line: the accent colour and when it was picked (Settings or
 // SITE COLOR), the FTP login (SITE LOGIN, or Settings) and the other choices of the
 // Settings tab. The password isn't stored: only a salted, repeated SHA-256 of
@@ -10,12 +10,12 @@ use crate::hash::{hex, sha256};
 use crate::sys::{self, File};
 use crate::ui::palette::{THEMES, Theme};
 
-pub const DEFAULT_ACCENT: u32 = 0xe44c3e;
-/// the old default red: read as today's, so it moves to the new one
+pub const DEFAULT_ACCENT: u32 = 0xa855f7;
+/// an old default red: read as today's, so it moves to the new one
 const OLD_DEFAULT: u32 = 0xb8283c;
 
-const DIR: &str = "/3ds/cement";
-const FILE: &str = "/3ds/cement/settings.ini";
+const DIR: &str = "/3ds/dreamftp";
+const FILE: &str = "/3ds/dreamftp/settings.ini";
 
 /// "#rrggbb" or "rrggbb", any case
 pub fn parse_color(s: &str) -> Option<u32> {
@@ -126,8 +126,8 @@ impl Default for Prefs {
             auto_off: 0,
             cia_info: true,
             protect: true,
-            update: true,
-            theme: Theme::Red,
+            update: false,
+            theme: Theme::Dream,
         }
     }
 }

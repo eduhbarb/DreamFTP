@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------
-# Cement 3DS server (Rust). "make" builds Cement.cia and Cement.3dsx,
+# DreamFTP 3DS server (Rust). "make" builds DreamFTP.cia and DreamFTP.3dsx,
 # "make PROFILE=fast" a quicker build to try changes (see Cargo.toml).
 #
 # Needs: the nightly Rust below with rust-src (rustup toolchain install <NIGHTLY> -c rust-src),
@@ -14,7 +14,7 @@ endif
 
 BUILD		:=	build
 PROFILE		?=	release
-ELF		:=	target/armv6k-nintendo-3ds/$(PROFILE)/cement-server.elf
+ELF		:=	target/armv6k-nintendo-3ds/$(PROFILE)/dreamftp.elf
 
 # the nightly the 3DS build is made with, the same here and in the release
 # workflow, so a tag builds the same app whenever it is built
@@ -55,9 +55,9 @@ APP_VERSION  := $(if $(COMMITS),$(BASE_VERSION)$(if $(DIRTY),-$(COMMIT)-dev,),$(
 endif
 
 # CIA title version = the VERSION file's major.minor.micro, so FBI and the
-# system settings show the same version as Cement. Builds between releases
+# system settings show the same version as DreamFTP. Builds between releases
 # share it: the 3DS refuses to install one over the same or a newer version
-# (D8E08027) unless the installed copy is deleted first (FBI does that, Cement
+# (D8E08027) unless the installed copy is deleted first (FBI does that, DreamFTP
 # can't for itself). makerom clears the minor bits of -ver, so
 # tools/set-cia-version.sh writes the version into the TMD after it.
 
@@ -65,7 +65,7 @@ endif
 define package
 	@mkdir -p $(BUILD)/$(1)
 	@$(BANNERTOOL) makebanner -i $(3) -a meta/audio.wav -o $(BUILD)/$(1)/banner.bnr
-	@$(BANNERTOOL) makesmdh -s "$(2)" -l "Fast FTP + CIA installer v$(APP_VERSION)" -p "Synaelle" -i $(4) -o $(BUILD)/$(1)/icon.icn
+	@$(BANNERTOOL) makesmdh -s "$(2)" -l "Fast FTP + CIA installer v$(APP_VERSION)" -p "DreamFTP" -i $(4) -o $(BUILD)/$(1)/icon.icn
 	@$(MAKEROM) -f cia -o $(1).cia -target t -exefslogo -rsf meta/$(1).rsf 		-elf $(5) -icon $(BUILD)/$(1)/icon.icn -banner $(BUILD)/$(1)/banner.bnr
 	@sh tools/set-cia-version.sh $(1).cia $(BASE_VERSION)
 	@cp $(5) $(1).elf
@@ -74,14 +74,14 @@ define package
 	@echo built ... $(1).3dsx v$(APP_VERSION)
 endef
 
-.PHONY: all cement clean
+.PHONY: all dreamftp clean
 
-all: cement
+all: dreamftp
 
-cement:
-	@CEMENT_VERSION="$(APP_VERSION)" $(CARGO) 3ds build --profile $(PROFILE)
-	$(call package,Cement,Cement,meta/banner.png,meta/icon.png,$(ELF))
+dreamftp:
+	@DREAMFTP_VERSION="$(APP_VERSION)" $(CARGO) 3ds build --profile $(PROFILE)
+	$(call package,DreamFTP,DreamFTP,meta/banner.png,meta/icon.png,$(ELF))
 
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) target Cement.elf Cement.cia Cement.3dsx
+	@rm -fr $(BUILD) target DreamFTP.elf DreamFTP.cia DreamFTP.3dsx

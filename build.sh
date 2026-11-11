@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds Cement.cia and Cement.3dsx on Linux (or WSL).
+# Builds DreamFTP.cia and DreamFTP.3dsx on Linux (or WSL).
 #
 # Needs: the Makefile's nightly Rust with rust-src, cargo-3ds and libclang,
 #        makerom and bannertool (on PATH, or MAKEROM=/path BANNERTOOL=/path),
@@ -40,7 +40,7 @@ if [ -z "${DEVKITARM:-}" ]; then
 	# no devkitPro installed: copy it once out of the official Docker image
 	# (running the build inside the image fails: its libc is older than
 	# what the Linux makerom release needs)
-	cache=${XDG_CACHE_HOME:-$HOME/.cache}/cement/devkitpro
+	cache=${XDG_CACHE_HOME:-$HOME/.cache}/dreamftp/devkitpro
 	if [ ! -x "$cache/tools/bin/3dsxtool" ] || [ ! -d "$cache/devkitARM" ] || [ "$(cat "$cache/.image" 2>/dev/null)" != "$IMAGE" ]; then
 		command -v docker >/dev/null || { echo "install devkitPro (set DEVKITARM) or Docker for the 3DS build" >&2; exit 1; }
 		echo "copying devkitARM out of $IMAGE to $cache (a few minutes, about 600 MB)"

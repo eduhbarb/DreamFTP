@@ -1,10 +1,10 @@
 // Copyright (C) 2026 Synaelle
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The screens' colours, picked in Settings: Cement's near-black and red, or
-// graphite and Miku teal. The red look follows the accent (Settings' Colour
+// The screens' colours, picked in Settings: DreamFTP's near-black and purple,
+// or graphite and teal. The Dream look follows the accent (Settings' Colour
 // row, or SITE COLOR from Baguette), the same way Baguette does: each colour
 // takes the accent's hue, and a lightness that keeps its luminance, so text
-// stays as easy to read as on the default red. Miku keeps its own colours.
+// stays as easy to read as on the default purple. Teal keeps its own colours.
 
 use crate::settings::DEFAULT_ACCENT;
 
@@ -27,57 +27,57 @@ pub struct Palette {
 }
 
 /// the colours the Settings tab steps through, the same as Baguette's, each as
-/// light as the default red (Custom is any other colour Baguette set)
+/// light as the default purple (Custom is any other colour Baguette set)
 pub const PRESETS: [(&str, Color); 8] = [
-    ("Red", DEFAULT_ACCENT),
-    ("Orange", 0xce622d),
-    ("Amber", 0xb6721c),
-    ("Green", 0x2b9349),
+    ("Purple", DEFAULT_ACCENT),
+    ("Indigo", 0x5865f2),
+    ("Blue", 0x3d8bfd),
     ("Teal", 0x20908a),
-    ("Blue", 0x4981d5),
-    ("Violet", 0x946dd5),
+    ("Green", 0x2b9349),
+    ("Amber", 0xb6721c),
+    ("Orange", 0xce622d),
     ("Pink", 0xcd53a6),
 ];
 
 /// the looks the Settings tab offers
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Theme {
-    Red,     // Cement's own: near-black and red
-    Miku,    // graphite and Miku teal
-    Ficelle, // the red look's colours, sharp, in Hanken Grotesk
+    Dream, // DreamFTP's own: near-black and purple
+    Teal,  // graphite and teal
+    Sharp, // the Dream look's colours, sharp, in Hanken Grotesk
 }
 
-pub const THEMES: [Theme; 3] = [Theme::Red, Theme::Miku, Theme::Ficelle];
+pub const THEMES: [Theme; 3] = [Theme::Dream, Theme::Teal, Theme::Sharp];
 
 impl Theme {
     pub fn name(self) -> &'static str {
         match self {
-            Theme::Miku => "Miku",
-            Theme::Ficelle => "Ficelle",
-            Theme::Red => "Red",
+            Theme::Teal => "Teal",
+            Theme::Sharp => "Sharp",
+            Theme::Dream => "Dream",
         }
     }
 
     /// its value in settings.ini
     pub fn key(self) -> &'static str {
         match self {
-            Theme::Miku => "miku",
-            Theme::Ficelle => "ficelle",
-            Theme::Red => "red",
+            Theme::Teal => "teal",
+            Theme::Sharp => "sharp",
+            Theme::Dream => "dream",
         }
     }
 
     fn palette(self) -> Palette {
         match self {
-            Theme::Miku => MIKU,
-            Theme::Ficelle => RED,
-            Theme::Red => RED,
+            Theme::Teal => TEAL,
+            Theme::Sharp => DREAM,
+            Theme::Dream => DREAM,
         }
     }
 }
 
-/// graphite and Miku teal
-const MIKU: Palette = Palette {
+/// graphite and teal
+const TEAL: Palette = Palette {
     accent: 0x3cc8bd,
     on_accent: 0x062320,
     highlight: 0x8ee6de,
@@ -92,20 +92,20 @@ const MIKU: Palette = Palette {
     dim: 0x9a9fa8,
 };
 
-/// near-black and red, from the Ficelle palette (Baguette uses it too)
-const RED: Palette = Palette {
+/// near-black and purple, DreamFTP's own look
+const DREAM: Palette = Palette {
     accent: DEFAULT_ACCENT,
-    on_accent: 0x140b09, // dark: white on this red is too faint
-    highlight: 0xe86a5e, // the accent made lighter, for small text on the track and selection
-    soft: 0xe6dfd8,
-    bg: 0x0e0d0d,
-    blob: 0x161414,
-    card: 0x161414,
-    track: 0x1f1c1b,
-    selected: 0x3a1915,
-    border: 0x2e2a28,
-    text: 0xe6dfd8,
-    dim: 0x9a918a,
+    on_accent: 0x14061f, // dark: white on this purple is too faint
+    highlight: 0xcbb0f5, // the accent made lighter, for small text on the track and selection
+    soft: 0xe6dcf5,
+    bg: 0x08060d,
+    blob: 0x160d24,
+    card: 0x150e21,
+    track: 0x1e1530,
+    selected: 0x2c1a45,
+    border: 0x2e2342,
+    text: 0xf4eefc,
+    dim: 0x9e93b0,
 };
 
 /// (hue in degrees, saturation, lightness), as Baguette's toHsl
@@ -170,11 +170,11 @@ fn with_luminance(h: f64, s: f64, target: f64) -> Color {
 }
 
 impl Palette {
-    /// the look's palette; the red one on another accent than the default
+    /// the look's palette; the Dream one on another accent than the default
     /// takes the accent's hue, as light (in luminance) as the default's colours
     pub fn for_accent(theme: Theme, accent: Color) -> Palette {
         let d = theme.palette();
-        if theme == Theme::Miku || accent == DEFAULT_ACCENT {
+        if theme == Theme::Teal || accent == DEFAULT_ACCENT {
             return d;
         }
         let (h, sat, _) = to_hsl(accent);
@@ -224,23 +224,23 @@ mod tests {
 
     #[test]
     fn accents_keep_the_contrast() {
-        // every preset's colours are as light as the default red's, and Miku ignores the accent
-        let red = Palette::for_accent(Theme::Red, DEFAULT_ACCENT);
+        // every preset's colours are as light as the default purple's, and Teal ignores the accent
+        let base = Palette::for_accent(Theme::Dream, DEFAULT_ACCENT);
         for (name, c) in PRESETS {
-            let p = Palette::for_accent(Theme::Red, c);
+            let p = Palette::for_accent(Theme::Dream, c);
             let pairs = [
-                (p.accent, red.accent),
-                (p.text, red.text),
-                (p.dim, red.dim),
-                (p.bg, red.bg),
-                (p.card, red.card),
-                (p.highlight, red.highlight),
+                (p.accent, base.accent),
+                (p.text, base.text),
+                (p.dim, base.dim),
+                (p.bg, base.bg),
+                (p.card, base.card),
+                (p.highlight, base.highlight),
             ];
             for (got, want) in pairs {
                 let (a, b) = (luminance(got), luminance(want));
                 assert!((a - b).abs() <= 0.01 + 0.03 * b, "{name}: {got:06x} vs {want:06x}");
             }
-            assert!(Palette::for_accent(Theme::Miku, c) == Palette::for_accent(Theme::Miku, DEFAULT_ACCENT));
+            assert!(Palette::for_accent(Theme::Teal, c) == Palette::for_accent(Theme::Teal, DEFAULT_ACCENT));
             // small text in the highlight, on the track and the selection
             assert!(contrast(p.highlight, p.track) >= 4.5 && contrast(p.highlight, p.selected) >= 4.5, "{name}");
         }

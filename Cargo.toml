@@ -1,6 +1,6 @@
 [package]
-name = "cement-server"
-version = "0.0.0" # the real version comes from the build (CEMENT_VERSION)
+name = "dreamftp"
+version = "0.0.0" # the real version comes from the build (DREAMFTP_VERSION)
 edition = "2024"
 publish = false
 license = "AGPL-3.0-or-later"

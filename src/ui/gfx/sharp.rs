@@ -1,6 +1,6 @@
 // Copyright (C) 2026 Synaelle
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The Ficelle look: the red look's colours (so the synced accent too), Hanken
+// The Sharp look: the Dream look's colours (so the synced accent too), Hanken
 // Grotesk at 400 and 600, sharp 2 px corners, 1 px borders and thin lines. Its
 // own layout of both screens, showing the same things as the round looks.
 
@@ -236,7 +236,7 @@ pub(super) fn paint_note(c: &mut Canvas, title: &str, detail: &str, pal: &Palett
 
 impl Server {
     /// 400 x 240: name, version and battery; the address; what's selected; the transfer card
-    pub(super) fn paint_top_ficelle(&self, c: &mut Canvas, t: &Top) {
+    pub(super) fn paint_top_sharp(&self, c: &mut Canvas, t: &Top) {
         let now = sys::now_ms();
         let pal = &self.ui.pal;
         c.fill(pal.bg);
@@ -246,7 +246,12 @@ impl Server {
         let mut y = 14.0;
         let (n, s) = (&HANKEN_SEMI_18, &HANKEN_REG_12);
         let base = y + n.ascent;
-        let end = c.text(n, left, base, "Cement", pal.text, 0.0);
+        // the mark, a crescent: a disc with the background cut out of it
+        let r = 6.5;
+        let cy = y + n.height / 2.0;
+        c.circle(left + r, cy, r, pal.accent);
+        c.circle(left + r + 2.8, cy - 2.2, r * 0.86, pal.bg);
+        let end = c.text(n, left + r * 2.0 + 8.0, base, "DreamFTP", pal.text, 0.0);
         let b = &HANKEN_REG_13;
         let pct = battery_text(t.bat);
         let mut x = right - b.width(&pct, 0.0);
@@ -275,7 +280,7 @@ impl Server {
         let ky = (y + (n.height - 14.0) / 2.0).round();
         c.card(x, ky, kw, 14.0, 2.0, pal.bg, strong(pal));
         c.text(k, x + 4.0, cap_baseline(k, 'S', ky + 7.0), "START", pal.dim, 0.0);
-        // the protocol level says which Baguette goes with this Cement
+        // the protocol level says which Baguette goes with this DreamFTP
         let version = s.fit(&format!("{VERSION} · protocol {PROTOCOL}"), x - 10.0 - end - 8.0);
         c.text(s, end + 8.0, base, &version, pal.dim, 0.0);
         y += n.height + 10.0;
@@ -365,7 +370,7 @@ impl Server {
     }
 
     /// 320 x 240: the tabs, the tab's list, then the cards, the message and the hints
-    pub(super) fn paint_bottom_ficelle(&self, c: &mut Canvas, b: &Bottom) -> Vec<Hit> {
+    pub(super) fn paint_bottom_sharp(&self, c: &mut Canvas, b: &Bottom) -> Vec<Hit> {
         let pal = &self.ui.pal;
         let mut hits = Vec::new();
         c.fill(pal.bg);
@@ -395,9 +400,9 @@ impl Server {
         };
         let bottom = self.hint_bar(c, b, &hints);
         match self.menu.tab {
-            Tab::Recent => self.recent_ficelle(c, bottom, &mut hits),
-            Tab::Browse => self.browse_ficelle(c, bottom, &mut hits),
-            Tab::Settings => self.settings_ficelle(c, bottom, &mut hits),
+            Tab::Recent => self.recent_sharp(c, bottom, &mut hits),
+            Tab::Browse => self.browse_sharp(c, bottom, &mut hits),
+            Tab::Settings => self.settings_sharp(c, bottom, &mut hits),
         }
         hits
     }
@@ -474,7 +479,7 @@ impl Server {
     }
 
     /// a quiet line in the middle of an empty list
-    fn empty_ficelle(&self, c: &mut Canvas, top: f32, bottom: f32, line: &str) {
+    fn empty_sharp(&self, c: &mut Canvas, top: f32, bottom: f32, line: &str) {
         let f = &HANKEN_REG_13;
         let line = f.fit(line, 296.0);
         c.text(
@@ -487,10 +492,10 @@ impl Server {
         );
     }
 
-    fn recent_ficelle(&self, c: &mut Canvas, bottom: f32, hits: &mut Vec<Hit>) {
+    fn recent_sharp(&self, c: &mut Canvas, bottom: f32, hits: &mut Vec<Hit>) {
         let top = self.section(c, "CIAs to install", &self.free_text());
         if let Some(line) = self.recent_empty() {
-            self.empty_ficelle(c, top, bottom, line);
+            self.empty_sharp(c, top, bottom, line);
             return;
         }
         let (rows, first) = window(top, bottom, 26.0, 0.0, self.cia_sel);
@@ -502,11 +507,11 @@ impl Server {
         }
     }
 
-    fn browse_ficelle(&self, c: &mut Canvas, bottom: f32, hits: &mut Vec<Hit>) {
+    fn browse_sharp(&self, c: &mut Canvas, bottom: f32, hits: &mut Vec<Hit>) {
         let br = &self.menu.browse;
         let top = self.section(c, &br.dir, &self.browse_count());
         if let Some(line) = self.browse_empty() {
-            self.empty_ficelle(c, top, bottom, line);
+            self.empty_sharp(c, top, bottom, line);
             return;
         }
         let (rows, first) = window(top, bottom, 26.0, 0.0, br.sel);
@@ -528,7 +533,7 @@ impl Server {
         }
     }
 
-    fn settings_ficelle(&self, c: &mut Canvas, bottom: f32, hits: &mut Vec<Hit>) {
+    fn settings_sharp(&self, c: &mut Canvas, bottom: f32, hits: &mut Vec<Hit>) {
         let pal = &self.ui.pal;
         let h = 19.0;
         let top = TAB_H + 4.0;
@@ -563,7 +568,7 @@ impl Server {
                         Some(UpdateNote::Out(tag)) => {
                             c.text_right(k, r, mid(k, cy), &format!("{tag} is out"), pal.highlight)
                         }
-                        Some(UpdateNote::Restart) => c.text_right(v, r, mid(v, cy), "restart Cement", ink),
+                        Some(UpdateNote::Restart) => c.text_right(v, r, mid(v, cy), "restart DreamFTP", ink),
                         Some(UpdateNote::Updating) => c.text_right(v, r, mid(v, cy), "updating...", ink),
                         None => {}
                     }

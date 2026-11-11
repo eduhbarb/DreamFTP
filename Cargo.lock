@@ -77,7 +77,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "cement-server"
+name = "dreamftp"
 version = "0.0.0"
 dependencies = [
  "ctru-rs",

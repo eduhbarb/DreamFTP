@@ -1,6 +1,6 @@
 // Copyright (C) 2026 Synaelle
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Cement - minimal, fast FTP server for the 3DS (SD card only)
+// DreamFTP - minimal, fast FTP server for the 3DS (SD card only)
 //
 // Design:
 // - one non-blocking poll() loop on the main thread handles every socket
@@ -41,7 +41,7 @@ use sys::AptEvent;
 use ctru as _; // links what std needs on the 3DS (pthread-3ds, shim-3ds)
 
 /// set by the build: the VERSION file (major.minor.micro), plus -<commit>-dev for a build with uncommitted changes
-pub const VERSION: &str = match option_env!("CEMENT_VERSION") {
+pub const VERSION: &str = match option_env!("DREAMFTP_VERSION") {
     Some(v) => v,
     None => "dev",
 };
@@ -65,10 +65,11 @@ const fn env_ms(v: Option<&str>, default: u64) -> u64 {
 
 // power: the screens turn off after an idle minute, and the New 3DS fast mode
 // (804 MHz, L2 cache) only runs while something is being done. The tests build
-// with shorter times (CEMENT_SCREEN_IDLE_MS, CEMENT_FAST_LINGER_MS).
-const SCREEN_IDLE_MS: u64 = env_ms(option_env!("CEMENT_SCREEN_IDLE_MS"), 60 * 1000); // no button, transfer or install
-const FAST_LINGER_MS: u64 = env_ms(option_env!("CEMENT_FAST_LINGER_MS"), 5000); // keeps fast mode between the files of a job
-const MINUTE_MS: u64 = env_ms(option_env!("CEMENT_MINUTE_MS"), 60 * 1000); // the auto off minutes (Settings)
+// with shorter times (DREAMFTP_SCREEN_IDLE_MS, DREAMFTP_FAST_LINGER_MS).
+const SCREEN_IDLE_MS: u64 = env_ms(option_env!("DREAMFTP_SCREEN_IDLE_MS"), 60 * 1000); // no button, transfer or install
+// keeps fast mode between the files of a job
+const FAST_LINGER_MS: u64 = env_ms(option_env!("DREAMFTP_FAST_LINGER_MS"), 5000);
+const MINUTE_MS: u64 = env_ms(option_env!("DREAMFTP_MINUTE_MS"), 60 * 1000); // the auto off minutes (Settings)
 
 // below this, on battery power, new transfers and installs are refused: the
 // console dying in the middle of an SD card write can corrupt the file system

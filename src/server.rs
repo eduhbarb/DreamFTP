@@ -535,7 +535,7 @@ impl Server {
                 s.rnfr.clear();
                 s.last_cmd = sys::now_ms();
                 s.cwd = "/".into();
-                s.reply("220 Cement ready\r\n");
+                s.reply("220 DreamFTP ready\r\n");
             }
             None => {
                 let _ = net::send(fd, b"421 Too many connections\r\n");
@@ -1483,7 +1483,7 @@ impl Server {
         self.sess[i].reply("200 OK\r\n");
     }
 
-    /// SITE COLOR [#rrggbb [secs]]: the red look's colour and when it was
+    /// SITE COLOR [#rrggbb [secs]]: the Dream look's colour and when it was
     /// picked (local clock, now when not given), kept on the SD card.
     /// Baguette compares the times and sends the newer colour, so it's
     /// always taken

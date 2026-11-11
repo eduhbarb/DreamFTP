@@ -1,26 +1,26 @@
 // Copyright (C) 2026 Synaelle
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The PC test build of the platform layer:
-// - the SD card is a folder (env CEMENT_ROOT, default ".")
-// - creating the file named by CEMENT_SLEEPFLAG closes the lid until it is deleted
-// - a CIA "install" is written to the file named by CEMENT_AMOUT, and
-//   CEMENT_INSTALLED="<title id hex>:<version>,..." lists the titles already installed
-//   (deleting one takes CEMENT_DELETE_MS, as it can on the console)
-// - keys come from the file named by CEMENT_KEYS ("A", "B", "X", "L", "R", "UP",
+// - the SD card is a folder (env DREAMFTP_ROOT, default ".")
+// - creating the file named by DREAMFTP_SLEEPFLAG closes the lid until it is deleted
+// - a CIA "install" is written to the file named by DREAMFTP_AMOUT, and
+//   DREAMFTP_INSTALLED="<title id hex>:<version>,..." lists the titles already installed
+//   (deleting one takes DREAMFTP_DELETE_MS, as it can on the console)
+// - keys come from the file named by DREAMFTP_KEYS ("A", "B", "X", "L", "R", "UP",
 //   "DOWN", "LEFT", "RIGHT", "SELECT", "TOUCH <x> <y>" on the bottom screen, or
 //   "HOLD <key> <ms>": pressed, then held down that long)
 // - turning the console off (auto off) is logged as "[shim] shutdown"
 // - the software keyboard answers with the lines of the file named by
-//   CEMENT_SWKBD, one per call ("<cancel>" or no line left: Cancel)
-// - CEMENT_BATTERY="<percent>[,charging|,plugged]" (default 100), CEMENT_NO_MCU=1
-//   hides the percentage, CEMENT_SDFREE fakes the free space
-// - CEMENT_SCREEN_DUMP=<dir> writes both drawn screens there as top.bmp and
+//   DREAMFTP_SWKBD, one per call ("<cancel>" or no line left: Cancel)
+// - DREAMFTP_BATTERY="<percent>[,charging|,plugged]" (default 100), DREAMFTP_NO_MCU=1
+//   hides the percentage, DREAMFTP_SDFREE fakes the free space
+// - DREAMFTP_SCREEN_DUMP=<dir> writes both drawn screens there as top.bmp and
 //   bottom.bmp each time they change
-// - CEMENT_UPDATE_URL=<url> is the update check's release JSON (http allowed;
-//   without it, nothing is checked), CEMENT_UPDATE_DOWNLOAD=<url with {tag}>
-//   the CIA download, CEMENT_UPDATE_VERSION the version this build plays
+// - DREAMFTP_UPDATE_URL=<url> is the update check's release JSON (http allowed;
+//   without it, nothing is checked), DREAMFTP_UPDATE_DOWNLOAD=<url with {tag}>
+//   the CIA download, DREAMFTP_UPDATE_VERSION the version this build plays
 //   (default its own, "dev": never older)
-// - CEMENT_PORT=<n> moves the control port (default 5000) and the PASV data
+// - DREAMFTP_PORT=<n> moves the control port (default 5000) and the PASV data
 //   ports to n+1..n+999, so test runs don't clash with each other or with a
 //   real 3DS session
 // - events the tests check are logged to stderr as "[shim] ..."
@@ -114,7 +114,7 @@ pub fn shutdown() -> bool {
 }
 
 pub fn keys_down() -> u32 {
-    let file = env("CEMENT_KEYS").unwrap_or_else(|| "keys.txt".into());
+    let file = env("DREAMFTP_KEYS").unwrap_or_else(|| "keys.txt".into());
     let Ok(text) = fs::read_to_string(&file) else { return 0 };
     if text.trim().is_empty() {
         return 0; // still being written: read it next time
@@ -157,9 +157,9 @@ pub fn keys_down() -> u32 {
     0
 }
 
-/// with CEMENT_SCREEN_DUMP set, saves the whole screen image as a BMP
+/// with DREAMFTP_SCREEN_DUMP set, saves the whole screen image as a BMP
 pub fn present(screen: Screen, px: &[u32], _x0: usize, _y0: usize, _x1: usize, _y1: usize) {
-    let Some(dir) = env("CEMENT_SCREEN_DUMP") else { return };
+    let Some(dir) = env("DREAMFTP_SCREEN_DUMP") else { return };
     let (name, w) = match screen {
         Screen::Top => ("top", 400),
         Screen::Bottom => ("bottom", 320),
@@ -191,7 +191,7 @@ pub fn present(screen: Screen, px: &[u32], _x0: usize, _y0: usize, _x1: usize, _
 }
 
 pub fn keyboard(hint: &str, _initial: &str, _password: bool, _max: usize) -> Option<String> {
-    let file = env("CEMENT_SWKBD")?;
+    let file = env("DREAMFTP_SWKBD")?;
     let text = fs::read_to_string(&file).ok()?;
     let mut lines = text.lines();
     let answer = lines.next()?.to_string();
@@ -229,7 +229,7 @@ pub fn apt_unhook() {
 }
 
 pub fn apt_main_loop() -> bool {
-    let flag = env("CEMENT_SLEEPFLAG").unwrap_or_else(|| "sleep.flag".into());
+    let flag = env("DREAMFTP_SLEEPFLAG").unwrap_or_else(|| "sleep.flag".into());
     if let Some((f, param)) = unsafe { HANDLER }
         && fs::metadata(&flag).is_ok()
     {
@@ -261,7 +261,7 @@ pub fn soc_exit() {
 
 /// the FTP control port, and the range the PASV data ports come from
 pub fn ports() -> (u16, u16, u16) {
-    let port = env("CEMENT_PORT").and_then(|p| p.trim().parse::<u16>().ok()).filter(|&p| p > 0 && p <= 65535 - 999);
+    let port = env("DREAMFTP_PORT").and_then(|p| p.trim().parse::<u16>().ok()).filter(|&p| p > 0 && p <= 65535 - 999);
     let port = port.unwrap_or(crate::server::CTRL_PORT);
     (port, port + 1, port + 999)
 }
@@ -279,26 +279,26 @@ pub fn ndm_leave() {}
 /// the tests' local server
 pub const PLAIN_HTTP: bool = true;
 
-/// from CEMENT_UPDATE_URL and CEMENT_UPDATE_DOWNLOAD: a test run never asks GitHub
+/// from DREAMFTP_UPDATE_URL and DREAMFTP_UPDATE_DOWNLOAD: a test run never asks GitHub
 pub fn update_urls(_api: &str, download: &str) -> Option<(String, String)> {
-    Some((env("CEMENT_UPDATE_URL")?, env("CEMENT_UPDATE_DOWNLOAD").unwrap_or_else(|| download.into())))
+    Some((env("DREAMFTP_UPDATE_URL")?, env("DREAMFTP_UPDATE_DOWNLOAD").unwrap_or_else(|| download.into())))
 }
 
-/// CEMENT_UPDATE_KEY (64 hex digits) stands in for the release key, so tests
+/// DREAMFTP_UPDATE_KEY (64 hex digits) stands in for the release key, so tests
 /// can sign with their own
 pub fn update_key(release: [u8; 32]) -> [u8; 32] {
-    env("CEMENT_UPDATE_KEY").and_then(|k| crate::hash::unhex32(&k)).unwrap_or(release)
+    env("DREAMFTP_UPDATE_KEY").and_then(|k| crate::hash::unhex32(&k)).unwrap_or(release)
 }
 
 pub fn app_version() -> String {
-    env("CEMENT_UPDATE_VERSION").unwrap_or_else(|| crate::VERSION.into())
+    env("DREAMFTP_UPDATE_VERSION").unwrap_or_else(|| crate::VERSION.into())
 }
 
 // ---------------------------------------------------------------------------
 // battery
 
 fn battery_env() -> String {
-    env("CEMENT_BATTERY").unwrap_or_default()
+    env("DREAMFTP_BATTERY").unwrap_or_default()
 }
 
 fn battery_level() -> i32 {
@@ -307,7 +307,7 @@ fn battery_level() -> i32 {
 }
 
 pub fn battery_percent() -> Option<u8> {
-    env("CEMENT_NO_MCU").is_none().then(|| battery_level().clamp(0, 255) as u8)
+    env("DREAMFTP_NO_MCU").is_none().then(|| battery_level().clamp(0, 255) as u8)
 }
 
 pub fn battery_bars() -> Option<u8> {
@@ -334,7 +334,7 @@ pub fn plugged() -> bool {
 // SD card: a folder
 
 fn real(path: &str) -> PathBuf {
-    let root = env("CEMENT_ROOT").unwrap_or_else(|| ".".into());
+    let root = env("DREAMFTP_ROOT").unwrap_or_else(|| ".".into());
     PathBuf::from(format!("{root}{path}"))
 }
 
@@ -454,10 +454,10 @@ fn local_offset(utc: i64) -> i64 {
     (local as i64 - ft as i64) / 10_000_000
 }
 
-/// the disk holding CEMENT_ROOT, in 32 KB clusters like an SD card
+/// the disk holding DREAMFTP_ROOT, in 32 KB clusters like an SD card
 pub fn sd_space() -> Option<(u64, u64)> {
     let (free, total) = disk_space(&real(""))?;
-    let free = env("CEMENT_SDFREE").map_or(free, |v| crate::util::parse_ull(v.as_bytes()));
+    let free = env("DREAMFTP_SDFREE").map_or(free, |v| crate::util::parse_ull(v.as_bytes()));
     Some((free / 32768 * 32768, total / 32768 * 32768))
 }
 
@@ -534,13 +534,13 @@ impl Joiner {
 }
 
 // ---------------------------------------------------------------------------
-// title installs: written to the file named by CEMENT_AMOUT
+// title installs: written to the file named by DREAMFTP_AMOUT
 
 pub struct AmInstall(fs::File);
 
 pub fn am_delete_title(media: u8, title: u64) {
     eprintln!("[shim] AM_DeleteTitle media={media} id={title:016x}");
-    if let Some(ms) = env("CEMENT_DELETE_MS") {
+    if let Some(ms) = env("DREAMFTP_DELETE_MS") {
         sleep_ms(crate::util::parse_ull(ms.as_bytes()));
     }
 }
@@ -548,7 +548,7 @@ pub fn am_delete_title(media: u8, title: u64) {
 pub fn am_delete_ticket(_: u64) {}
 
 pub fn am_title_version(_media: u8, title: u64) -> Option<u16> {
-    let list = env("CEMENT_INSTALLED")?;
+    let list = env("DREAMFTP_INSTALLED")?;
     list.split(',').find_map(|t| {
         let (id, version) = t.trim().split_once(':')?;
         (u64::from_str_radix(id, 16).ok()? == title).then(|| version.parse().ok())?
@@ -558,7 +558,7 @@ pub fn am_title_version(_media: u8, title: u64) -> Option<u16> {
 pub fn am_query_external_db() {}
 
 pub fn am_start(media: u8) -> Result<AmInstall, i32> {
-    let out = env("CEMENT_AMOUT").unwrap_or_else(|| "am-installed.bin".into());
+    let out = env("DREAMFTP_AMOUT").unwrap_or_else(|| "am-installed.bin".into());
     let f = fs::File::create(out).map_err(|_| -1)?;
     eprintln!("[shim] AM_StartCiaInstall media={media}");
     Ok(AmInstall(f))
@@ -595,7 +595,7 @@ pub fn is_new3ds() -> Option<bool> {
     Some(false)
 }
 
-/// Cement itself, installed on the SD card
+/// DreamFTP itself, installed on the SD card
 pub fn self_title() -> Option<(u64, u8)> {
     Some((0x0004_0000_0F7A_5100, MEDIA_SD))
 }

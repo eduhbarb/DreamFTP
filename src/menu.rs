@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Synaelle
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The bottom screen's tabs, switched with L and R or by touching them:
-// - Recent: the CIA files sent since Cement started, or found at startup
+// - Recent: the CIA files sent since DreamFTP started, or found at startup
 // - Browse: the SD card's folders, to open them and install a CIA from them;
 //   A on an image shows it on the top screen until B (or A again)
 // On both, X deletes the selected file (pressed twice: it can't be undone);
@@ -419,7 +419,7 @@ impl Server {
         self.save_prefs();
     }
 
-    /// the red look's colour, from Settings or SITE COLOR, with when it was picked
+    /// the Dream look's colour, from Settings or SITE COLOR, with when it was picked
     pub fn set_accent(&mut self, accent: u32, time: u64) {
         (self.accent, self.accent_time) = (accent, time);
         settings::save_accent(accent, time);

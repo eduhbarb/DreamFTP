@@ -1,12 +1,12 @@
 BasicInfo:
-  Title                   : "Cement"
-  ProductCode             : "CTR-H-CMNT"
+  Title                   : "DreamFTP"
+  ProductCode             : "CTR-H-DRMF"
   Logo                    : Homebrew
 
 
 TitleInfo:
   Category                : Application
-  UniqueId                : 0xF7A51
+  UniqueId                : 0xF7A52
 
 Option:
   UseOnSD                 : true # true if App is to be installed to SD

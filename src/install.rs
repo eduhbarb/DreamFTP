@@ -543,7 +543,7 @@ fn install(path: &str, total: u64, confirmed: bool, shared: &Shared) {
                         fail(&mut r, 0, "This title is for New 3DS only");
                         break;
                     }
-                    // like FBI, but only when AM needs it; Cement can't delete itself, so
+                    // like FBI, but only when AM needs it; DreamFTP can't delete itself, so
                     // the same or an older version of it can't go over it
                     let delete = must_delete(sys::am_title_version(dest, id), version);
                     // the file may have changed since it was asked about
@@ -552,7 +552,7 @@ fn install(path: &str, total: u64, confirmed: bool, shared: &Shared) {
                         break;
                     }
                     if delete && sys::self_title() == Some((id, dest)) {
-                        fail(&mut r, 0, "Use FBI to reinstall Cement");
+                        fail(&mut r, 0, "Use FBI to reinstall DreamFTP");
                         break;
                     }
                     if delete {
@@ -637,7 +637,7 @@ mod tests {
             h[i * 4..i * 4 + 4].copy_from_slice(&v.to_le_bytes());
         }
         h[0x18..0x20].copy_from_slice(&0x14_7400u64.to_le_bytes());
-        assert_eq!(cia_size(&h), Some(1_370_048)); // a Cement.cia, exactly its file size
+        assert_eq!(cia_size(&h), Some(1_370_048)); // a DreamFTP.cia, exactly its file size
         assert_eq!(cia_size(&h[..0x10]), None);
     }
 

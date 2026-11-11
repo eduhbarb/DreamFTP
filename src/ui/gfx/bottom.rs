@@ -40,7 +40,7 @@ fn toggle(c: &mut Canvas, right: f32, cy: f32, on: bool, pal: &Palette) {
     let (x, y) = (right - w, (cy - h / 2.0).round());
     c.pill(x, y, w, h, if on { pal.accent } else { pal.track });
     let kx = if on { x + w - 7.0 } else { x + 7.0 };
-    // a white knob on a light accent (Miku's teal) gets a dark edge to stand out
+    // a white knob on a light accent (Teal's teal) gets a dark edge to stand out
     if on && contrast(WHITE, pal.accent) < 3.0 {
         c.circle(kx, y + 7.0, 5.5, pal.on_accent);
         c.circle(kx, y + 7.0, 4.5, WHITE);
@@ -259,7 +259,7 @@ impl Server {
         let card = if let Some((done, total)) = self.update.progress() {
             let pct = (done * 100).checked_div(total).unwrap_or(0);
             Some(CardText {
-                title: format!("Downloading Cement {tag}"),
+                title: format!("Downloading DreamFTP {tag}"),
                 value: if total != 0 { format!("{pct}%") } else { String::new() },
                 frac: (total != 0).then(|| done as f32 / total as f32),
                 detail: if total != 0 {
@@ -271,7 +271,7 @@ impl Server {
             })
         } else if let Stage::Waiting(size) = self.update.stage {
             Some(CardText {
-                title: format!("Downloaded Cement {tag}"),
+                title: format!("Downloaded DreamFTP {tag}"),
                 value: String::new(),
                 frac: Some(0.0),
                 detail: format!("{} · installs when the transfers end", format_size(size)),
@@ -290,7 +290,7 @@ impl Server {
             let preparing = inst.shared.preparing.load(std::sync::atomic::Ordering::Relaxed);
             let card = CardText {
                 title: if is_update {
-                    format!("Installing Cement {tag}")
+                    format!("Installing DreamFTP {tag}")
                 } else {
                     format!("Installing {}", base_name(&inst.path))
                 },
@@ -345,7 +345,7 @@ impl Server {
         hints
     }
 
-    /// the CIAs sent since Cement started, or found in the usual folders
+    /// the CIAs sent since DreamFTP started, or found in the usual folders
     fn paint_recent(&self, c: &mut Canvas, b: &Bottom, hits: &mut Vec<Hit>) {
         let pal = &self.ui.pal;
         let s = &NUNITO_BOLD_11;
@@ -465,7 +465,7 @@ impl Server {
                             c.text(p, r - pw + 7.0, py + 0.5 + p.ascent, &text, pal.on_accent, 0.0);
                         }
                         Some(UpdateNote::Restart) => {
-                            c.text_right(f, r, base, "restart Cement", if sel { pal.soft } else { pal.dim });
+                            c.text_right(f, r, base, "restart DreamFTP", if sel { pal.soft } else { pal.dim });
                         }
                         Some(UpdateNote::Updating) => {
                             c.text_right(f, r, base, "updating...", if sel { pal.soft } else { pal.dim });
