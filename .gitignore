@@ -3,4 +3,6 @@ build/
 *.elf
 *.cia
 *.3dsx
+SHA256SUMS
+qrcode.png
 .atelier/
