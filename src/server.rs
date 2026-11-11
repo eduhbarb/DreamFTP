@@ -910,7 +910,7 @@ impl Server {
             self.cia_add(&path, size);
             // a .cia sent over FTP installs on its own, like dropping it in FBI;
             // reinstall, downgrade and system titles still ask on the bottom screen
-            if util::is_cia(&path) {
+            if util::is_cia(&path) && self.prefs.ftp_install {
                 let _ = self.request_install(&path, true);
             }
         }

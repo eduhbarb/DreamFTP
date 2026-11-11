@@ -33,9 +33,10 @@ X deletes a file or folder when pressed twice, except the important 3DS files
 while their protection is on.
 
 A `.cia` sent over FTP installs by itself when the upload finishes, then the file
-is deleted. Reinstalls, downgrades and system titles still ask for A on the
-bottom screen. To keep a CIA on the card without installing it, give it another
-extension (`.cia.bak`) and rename it back later.
+is deleted. Settings' "Install CIA over FTP" turns that off, and the file then
+stays on the card until A in Recent. Reinstalls, downgrades and system titles
+always ask for A on the bottom screen. To keep a CIA on the card without
+installing it, give it another extension (`.cia.bak`) and rename it back later.
 
 With no login set, anyone on your Wi-Fi can connect. Only a salted hash of the
 password is kept.

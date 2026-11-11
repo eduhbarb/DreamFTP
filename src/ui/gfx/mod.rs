@@ -352,6 +352,9 @@ fn help(row: Row) -> &'static str {
         Row::CiaInfo => {
             "Shows the selected CIA under the address: its icon, title, version and whether it's new or an update."
         }
+        Row::FtpInstall => {
+            "A CIA sent over FTP installs when its upload finishes, then the file goes. Off, it waits for A in Recent."
+        }
         Row::Protect => {
             "Can't delete /Nintendo 3DS, /boot.firm, /luma, /gm9 or /boot.3dsx. Luma's screenshots stay free."
         }

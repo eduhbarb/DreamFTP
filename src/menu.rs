@@ -46,6 +46,7 @@ impl Tab {
 pub enum Row {
     Login,
     Ftp,
+    FtpInstall,
     CiaInfo,
     Protect,
     ScreenIdle,
@@ -55,9 +56,10 @@ pub enum Row {
     Update,
 }
 
-pub const ROWS: [Row; 9] = [
+pub const ROWS: [Row; 10] = [
     Row::Login,
     Row::Ftp,
+    Row::FtpInstall,
     Row::CiaInfo,
     Row::Protect,
     Row::ScreenIdle,
@@ -462,6 +464,10 @@ impl Server {
             }
             Row::CiaInfo => {
                 self.prefs.cia_info = !self.prefs.cia_info;
+                self.save_prefs();
+            }
+            Row::FtpInstall => {
+                self.prefs.ftp_install = !self.prefs.ftp_install;
                 self.save_prefs();
             }
             Row::Protect => {
