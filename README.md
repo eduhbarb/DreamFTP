@@ -1,4 +1,8 @@
 <p align="center">
+  <a href="README.pt-BR.md">Português (BR)</a> · <b>English</b>
+</p>
+
+<p align="center">
   <img src="meta/banner.png" alt="DreamFTP">
 </p>
 
@@ -6,14 +10,32 @@
 
 <p align="center">FTP server, file browser and CIA installer for your 3DS</p>
 
-DreamFTP is a purple-and-black fork of [Cement](https://github.com/Synaelle/cement)
-by Synaelle: the same fast FTP server and CIA installer, with its own look, name
-and icon. Everything below that is not the look comes from Cement.
+> [!NOTE]
+> DreamFTP is a fork of [Cement](https://github.com/Synaelle/cement) by
+> Synaelle. The difference: **a `.cia` sent over FTP installs by itself** when
+> the upload ends, then the file is deleted. Settings has the switch.
+
+## What's different from Cement
+
+- **Install on upload.** Send a `.cia` over FTP and it installs when the upload
+  finishes; the file goes away. Settings → "Install CIA over FTP" turns that
+  off, and uploads then wait for A in Recent.
+- **Purple and black look.** Dream, Teal and Sharp themes, and a crescent mark
+  on the top screen.
+- **New name, icon and banner.**
+- Everything else — the FTP server, the browser, the CIA installer, the SITE
+  commands and Baguette support — is Cement's work.
+
+## Install
+
+Scan this in FBI (Remote Install → Scan QR Code), or download `DreamFTP.cia`
+from [Releases](../../releases/latest) and install it from the SD card.
+
+<img src="meta/qr.png" width="180" alt="QR code for DreamFTP.cia">
+
+The `.3dsx` is in Releases too, for the Homebrew Launcher.
 
 ## Use it
-
-Build `DreamFTP.cia` or `DreamFTP.3dsx` (see below) and install it with FBI.
-There are no releases of this fork yet, so there is no QR code.
 
 Open it and connect to the address on the top screen (like `192.168.1.10:5000`)
 with any FTP client, or with [Baguette](https://github.com/Synaelle/baguette), the
@@ -38,9 +60,6 @@ stays on the card until A in Recent. Reinstalls, downgrades and system titles
 always ask for A on the bottom screen. To keep a CIA on the card without
 installing it, give it another extension (`.cia.bak`) and rename it back later.
 
-With no login set, anyone on your Wi-Fi can connect. Only a salted hash of the
-password is kept.
-
 ## The look
 
 Three looks in Settings, all on near-black: **Dream** (purple), **Teal** (graphite
@@ -49,7 +68,8 @@ follows the Colour row, or `SITE COLOR` from Baguette, so every accent recolours
 the whole app.
 
 `tools/make-art.ps1` redraws `meta/icon.png` and `meta/banner.png` (the crescent)
-on Windows.
+on Windows. `tools/serve-cia.mjs` serves a `.cia` on the local network, for FBI's
+Remote Install.
 
 ## Build
 
@@ -61,7 +81,8 @@ cargo install --locked cargo-3ds --version 0.1.5
 ./build.sh
 ```
 
-`./build.sh fast` builds quicker to try a change.
+`./build.sh fast` builds quicker to try a change. GitHub Actions builds both
+files too (Actions → build → Run workflow).
 
 ## Credits
 
